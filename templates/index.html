@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Firewall Rule Simulator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+        h2, h3 {
+            color: #333;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .danger {
+            background-color: red;
+        }
+        .danger:hover {
+            background-color: darkred;
+        }
+        table {
+            width: 80%;
+            margin-bottom: 20px;
+            border-collapse: collapse;
+            box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h2>Firewall Rule Simulator</h2>
+    <form method="POST">
+        <button type="submit">Simulate Traffic</button>
+    </form>
+
+    <h3>Firewall Rules</h3>
+    <table>
+        <tr><th>IP</th><th>Port</th><th>Protocol</th><th>Action</th></tr>
+        {% for rule in rules %}
+        <tr>
+            <td>{{ rule[0] }}</td>
+            <td>{{ rule[1] }}</td>
+            <td>{{ rule[2] }}</td>
+            <td>{{ rule[3] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h3>Simulated Packets</h3>
+    <table>
+        <tr><th>IP</th><th>Port</th><th>Protocol</th><th>Action</th><th>Random</th></tr>
+        {% for packet in packets %}
+        <tr>
+            <td>{{ packet[0] }}</td>
+            <td>{{ packet[1] }}</td>
+            <td>{{ packet[2] }}</td>
+            <td>{{ packet[3] }}</td>
+            <td>{{ packet[4] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h3>Packet Logs</h3>
+    <form method="POST" action="/clear_logs" style="display:inline;">
+        <button type="submit" class="danger">Clear Logs</button>
+    </form>
+    <form method="GET" action="/download_logs" style="display:inline;">
+        <button type="submit">Download Logs (CSV)</button>
+    </form>
+    <table>
+        <tr><th>IP</th><th>Port</th><th>Protocol</th><th>Action</th><th>Random</th></tr>
+        {% for log in logs %}
+        <tr>
+            <td>{{ log[0] }}</td>
+            <td>{{ log[1] }}</td>
+            <td>{{ log[2] }}</td>
+            <td>{{ log[3] }}</td>
+            <td>{{ log[4] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
