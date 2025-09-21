@@ -90,6 +90,5 @@ def download_logs():
     response.headers["Content-Disposition"] = "attachment; filename=firewall_logs.csv"
     return response
 
-
 if __name__ == "__main__":
     app.run(debug=True)
