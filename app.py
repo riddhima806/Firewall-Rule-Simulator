@@ -1,7 +1,29 @@
+import os
+import glob
 from flask import Flask, render_template, request, redirect, Response
 import random
 import csv
 import io
+import pandas as pd
+
+# Load all Parquet files from multiple dataset folders
+dataset_folders = [
+    "data/CICIDS2017/",
+    "data/cic-ddos/",
+    "data/unsw-nb/"
+]
+
+df_list = []
+for folder in dataset_folders:
+    parquet_files = glob.glob(os.path.join(folder, "*.parquet"))
+    for file in parquet_files:
+        df_list.append(pd.read_parquet(file))
+if df_list:
+    df = pd.concat(df_list, ignore_index=True)
+    print(df.head())
+    print(df.columns)
+else:
+    print("No parquet files found in the specified folders.")
 
 app = Flask(__name__)
 

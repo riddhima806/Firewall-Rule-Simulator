@@ -1,58 +1,87 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8" />
     <title>Firewall Rule Simulator</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
             background-color: #f9f9f9;
+            color: #222;
         }
-        h2, h3 {
-            color: #333;
-        }
+        h2, h3 { color: #333; }
+        .controls { margin-bottom: 18px; }
         button {
             background-color: #4CAF50;
             color: white;
-            padding: 10px 15px;
+            padding: 8px 12px;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
+            margin-right: 8px;
         }
-        button:hover {
-            background-color: #45a049;
-        }
-        .danger {
-            background-color: red;
-        }
-        .danger:hover {
-            background-color: darkred;
+        button.danger { background-color: #d9534f; }
+        button.secondary { background-color: #6c757d; }
+        .form-inline input, .form-inline select {
+            padding: 6px;
+            margin-right: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
         }
         table {
-            width: 80%;
-            margin-bottom: 20px;
+            width: 90%;
             border-collapse: collapse;
-            box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 18px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+            background: #fff;
         }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: center;
-        }
-        th {
-            background-color: #4CAF50;
-            color: white;
-        }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
+        th, td { padding: 10px; border: 1px solid #e6e6e6; text-align: center; }
+        th { background: #0275d8; color: white; }
+        tr:nth-child(even) { background: #fbfbfb; }
+        .action-block { color: #c0392b; font-weight: bold; }
+        .action-allow { color: #27ae60; font-weight: bold; }
+        .small { font-size: 0.9em; color: #555; }
+        .container { max-width: 1100px; }
     </style>
 </head>
 <body>
+<div class="container">
     <h2>Firewall Rule Simulator</h2>
-    <form method="POST">
-        <button type="submit">Simulate Traffic</button>
-    </form>
+
+    <div class="controls">
+        <form method="POST" style="display:inline;">
+            <button type="submit">Simulate Traffic</button>
+        </form>
+
+        <form method="POST" action="/clear_logs" style="display:inline;">
+            <button type="submit" class="danger">Clear Logs</button>
+        </form>
+
+        <form method="GET" action="/download_logs" style="display:inline;">
+            <button type="submit" class="secondary">Download Logs (CSV)</button>
+        </form>
+    </div>
+
+    <h3>Add Firewall Rule</h3>
+    <div class="form-container">
+        <form class="form-inline" method="POST" action="/add_rule">
+            <input type="text" name="ip" placeholder="IP (e.g. 192.168.1.5 or *)" required>
+            <input type="text" name="port" placeholder="Port (e.g. 80 or *)" required>
+            <select name="protocol" required>
+                <option value="TCP">TCP</option>
+                <option value="UDP">UDP</option>
+                <option value="ICMP">ICMP</option>
+                <option value="*">*</option>
+            </select>
+            <select name="action" required>
+                <option value="block">Block</option>
+                <option value="allow">Allow</option>
+            </select>
+            <button type="submit">Add Rule</button>
+        </form>
+        <p class="small">Use <strong>*</strong> as a wildcard for IP/Port/Protocol.</p>
+    </div>
 
     <h3>Firewall Rules</h3>
     <table>
@@ -62,12 +91,18 @@
             <td>{{ rule[0] }}</td>
             <td>{{ rule[1] }}</td>
             <td>{{ rule[2] }}</td>
-            <td>{{ rule[3] }}</td>
+            <td>
+                {% if rule[3] == "block" %}
+                    <span class="action-block">BLOCK</span>
+                {% else %}
+                    <span class="action-allow">ALLOW</span>
+                {% endif %}
+            </td>
         </tr>
         {% endfor %}
     </table>
 
-    <h3>Simulated Packets</h3>
+    <h3>Simulated Packets (this run)</h3>
     <table>
         <tr><th>IP</th><th>Port</th><th>Protocol</th><th>Action</th><th>Random</th></tr>
         {% for packet in packets %}
@@ -75,19 +110,19 @@
             <td>{{ packet[0] }}</td>
             <td>{{ packet[1] }}</td>
             <td>{{ packet[2] }}</td>
-            <td>{{ packet[3] }}</td>
+            <td>
+                {% if packet[3] == "block" %}
+                    <span class="action-block">BLOCK</span>
+                {% else %}
+                    <span class="action-allow">ALLOW</span>
+                {% endif %}
+            </td>
             <td>{{ packet[4] }}</td>
         </tr>
         {% endfor %}
     </table>
 
-    <h3>Packet Logs</h3>
-    <form method="POST" action="/clear_logs" style="display:inline;">
-        <button type="submit" class="danger">Clear Logs</button>
-    </form>
-    <form method="GET" action="/download_logs" style="display:inline;">
-        <button type="submit">Download Logs (CSV)</button>
-    </form>
+    <h3>Packet Logs (all simulated runs)</h3>
     <table>
         <tr><th>IP</th><th>Port</th><th>Protocol</th><th>Action</th><th>Random</th></tr>
         {% for log in logs %}
@@ -95,10 +130,17 @@
             <td>{{ log[0] }}</td>
             <td>{{ log[1] }}</td>
             <td>{{ log[2] }}</td>
-            <td>{{ log[3] }}</td>
+            <td>
+                {% if log[3] == "block" %}
+                    <span class="action-block">BLOCK</span>
+                {% else %}
+                    <span class="action-allow">ALLOW</span>
+                {% endif %}
+            </td>
             <td>{{ log[4] }}</td>
         </tr>
         {% endfor %}
     </table>
+</div>
 </body>
 </html>
